@@ -3,16 +3,18 @@ package pl.org.pablo.slack.money.slack
 import org.springframework.http.HttpStatus
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.*
+import pl.org.pablo.slack.money.slack.request.SlackProperties
 
 @RestController
 @RequestMapping("/slack/")
 class SlackRestController(
-        private val slackService: SlackService
+        private val slackService: SlackService,
+        private val slackProperties: SlackProperties
 ) {
 
     private fun generateRequest(param: MultiValueMap<String, String>): SlackRequest {
         val slackRequest = SlackRequest(param.toSingleValueMap())
-        if (slackRequest.token != "d4d24HG6zqjv5rIJVUA5gA0y") {
+        if (slackRequest.token != slackProperties.verification) {
             throw IllegalAccessException()
         }
         return slackRequest

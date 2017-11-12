@@ -8,4 +8,5 @@ import org.springframework.context.annotation.Configuration
 class SlackProperties {
     lateinit var token: String
     lateinit var base: String
+    lateinit var verification: String
 }
