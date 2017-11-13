@@ -18,3 +18,5 @@ data class AddDto(
         val value: Int,
         val description: String? = null
 )
+
+class SelfMoneyException : RuntimeException()
