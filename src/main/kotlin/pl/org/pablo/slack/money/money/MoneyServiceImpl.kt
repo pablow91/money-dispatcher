@@ -84,7 +84,7 @@ class MoneyServiceImpl(
             return if (node.value > remainingValue) {
                 //My dept to him is reduced
                 node.value -= remainingValue
-                moneyRelationshipRepository.save(node,0)
+                moneyRelationshipRepository.save(node, 0)
                 0
             } else {
                 //My dept to him is payed
@@ -109,7 +109,7 @@ class MoneyServiceImpl(
     private fun optimizeTransitive(from: UserEntity, old: BalanceRelationship, remainingValue: Int): Int {
         return if (remainingValue >= old.value) {
             val bal = BalanceRelationship(from, old.receiver, old.value)
-            moneyRelationshipRepository.save(bal,0)
+            moneyRelationshipRepository.save(bal, 0)
 
             old.payer.toPay.remove(old)
             old.receiver.toReturn.remove(old)
