@@ -3,6 +3,7 @@ package pl.org.pablo.slack.money.money
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,38 +30,15 @@ class MoneyServiceIntegrationTests {
         userService.cleanAll()
     }
 
-    //Test utils
+    //Test data
     val u1 = UserEntity("u1")
     val u2 = UserEntity("u2")
     val u3 = UserEntity("u3")
 
-    fun pay(from: UserEntity, to: UserEntity, value: Int): PayRelationship {
-        cut.addMoney(AddDto(from.name, to.name, value))
-        return PayRelationship(from, to, value)
-    }
-
-    fun <T> checkList(a: List<T>, b: List<T>, comp: (T, T) -> Boolean) {
-        assertEquals(a.size, b.size)
-        assertTrue(a.all { q -> b.any { p -> comp(q, p) } })
-    }
-
-    fun checkPayRelationship(p1: PayRelationship, p2: PayRelationship): Boolean =
-            (p1.payer.name == p2.payer.name) && (p1.receiver.name == p2.receiver.name) && (p1.value == p2.value)
-
-    fun checkBalanceRelationship(b1: BalanceRelationship, b2: BalanceRelationship): Boolean =
-            (b1.payer.name == b2.payer.name) && (b1.receiver.name == b2.receiver.name) && (b1.value == b2.value)
-
-    fun check(userEntity: UserEntity) {
-        val result = userService.getOrCreate(userEntity.name)
-        checkList(userEntity.payed, result.payed, this::checkPayRelationship)
-        checkList(userEntity.received, result.received, this::checkPayRelationship)
-        checkList(userEntity.toPay, result.toPay, this::checkBalanceRelationship)
-        checkList(userEntity.toReturn, result.toReturn, this::checkBalanceRelationship)
-    }
-
     //Tests
+    @DisplayName("U1 pays to U2 and U2 pays to U3 same amounts -> U3 has to give all to U1")
     @Test
-    fun test2() {
+    fun test1() {
         val p1 = pay(u1, u2, 10)
         val p2 = pay(u2, u3, 10)
 
@@ -82,8 +60,9 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
+    @DisplayName("U1 pays to U2 and U2 pays half to U3 -> U3 give 5 to U1 and 5 to U2")
     @Test
-    fun test3() {
+    fun test2() {
         val p1 = pay(u1, u2, 10)
         val p2 = pay(u2, u3, 5)
 
@@ -107,8 +86,9 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
+    @DisplayName("U1 pays U2 twice -> U2 has to pay all to U1")
     @Test
-    fun test4() {
+    fun test3() {
         val p1 = pay(u1, u2, 10)
         val p2 = pay(u1, u2, 10)
 
@@ -125,8 +105,9 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
+    @DisplayName("U1 pays U2 same amount as U2 pays to U1 -> nobody pays anything")
     @Test
-    fun test6() {
+    fun test4() {
         val p1 = pay(u1, u2, 10)
         val p2 = pay(u2, u1, 10)
 
@@ -141,8 +122,9 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
+    @DisplayName("U1 pays U2 and U2 pays half to U1 -> U2 has to pay U1 other half")
     @Test
-    fun test7() {
+    fun test5() {
         val p1 = pay(u1, u2, 10)
         val p2 = pay(u2, u1, 5)
 
@@ -161,8 +143,9 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
+    @DisplayName("U1 pays U2 and U3 same amount and U2 pays U3 -> U3 has to pay all to U1")
     @Test
-    fun test9() {
+    fun test6() {
         val p1 = pay(u1, u2, 10)
         val p2 = pay(u1, u3, 10)
         val p3 = pay(u2, u3, 10)
@@ -185,8 +168,9 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
+    @DisplayName("U1 pays U2 and U3 same amount and U2 pays U3 twice as much -> U3 pays to U1 and U2")
     @Test
-    fun test10() {
+    fun test7() {
         val p1 = pay(u1, u2, 10)
         val p2 = pay(u1, u3, 10)
         val p3 = pay(u2, u3, 20)
@@ -211,8 +195,9 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
+    @DisplayName("U1 pays U2 and U3 same amount and U2 pays U3 half -> U3 pays to U1 and U2 pays to U1")
     @Test
-    fun test11() {
+    fun test8() {
         val p1 = pay(u1, u2, 10)
         val p2 = pay(u1, u3, 10)
         val p3 = pay(u2, u3, 5)
@@ -235,6 +220,30 @@ class MoneyServiceIntegrationTests {
                 received = arrayListOf(p2, p3),
                 toPay = arrayListOf(b2)
         ))
+    }
+
+    fun pay(from: UserEntity, to: UserEntity, value: Int): PayRelationship {
+        cut.addMoney(AddDto(from.name, to.name, value))
+        return PayRelationship(from, to, value)
+    }
+
+    fun <T> checkList(a: List<T>, b: List<T>, comp: (T, T) -> Boolean) {
+        assertEquals(a.size, b.size)
+        assertTrue(a.all { q -> b.any { p -> comp(q, p) } })
+    }
+
+    fun checkPayRelationship(p1: PayRelationship, p2: PayRelationship): Boolean =
+            (p1.payer.name == p2.payer.name) && (p1.receiver.name == p2.receiver.name) && (p1.value == p2.value)
+
+    fun checkBalanceRelationship(b1: BalanceRelationship, b2: BalanceRelationship): Boolean =
+            (b1.payer.name == b2.payer.name) && (b1.receiver.name == b2.receiver.name) && (b1.value == b2.value)
+
+    fun check(userEntity: UserEntity) {
+        val result = userService.getOrCreate(userEntity.name)
+        checkList(userEntity.payed, result.payed, this::checkPayRelationship)
+        checkList(userEntity.received, result.received, this::checkPayRelationship)
+        checkList(userEntity.toPay, result.toPay, this::checkBalanceRelationship)
+        checkList(userEntity.toReturn, result.toReturn, this::checkBalanceRelationship)
     }
 
 }

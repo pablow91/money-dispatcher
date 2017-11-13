@@ -23,7 +23,7 @@ class ModelIntegrationTests {
     lateinit var session: Session
 
     @Test
-    fun basicPaymentTest() {
+    fun basicPaymentTestUsingMoneyRepository() {
         val u1 = UserEntity("u1")
         val u2 = UserEntity("u2")
 
@@ -41,7 +41,7 @@ class ModelIntegrationTests {
     }
 
     @Test
-    fun bla() {
+    fun basicPaymentTestUsingUserRepository() {
         val u1 = UserEntity("u1")
         val u2 = UserEntity("u2")
         userRepository.save(u1)

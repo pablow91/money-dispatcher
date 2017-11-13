@@ -43,7 +43,7 @@ class MoneyServiceTests extends Specification {
         userR.getOrCreate("2") >> u2
         cut.addMoney(param)
         then:
-        1 * moneyR.save(new PayRelationship(u2, u1, 10, null, LocalDateTime.now(), null),0)
+        1 * moneyR.save(new PayRelationship(u2, u1, 10, null, LocalDateTime.now(), null), 0)
         1 * moneyR.save(new BalanceRelationship(u1, u2, 10, null), 0)
         0 * _
     }
