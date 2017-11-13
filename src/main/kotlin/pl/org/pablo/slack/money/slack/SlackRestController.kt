@@ -3,6 +3,7 @@ package pl.org.pablo.slack.money.slack
 import org.springframework.http.HttpStatus
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.*
+import pl.org.pablo.slack.money.money.SelfMoneyException
 import pl.org.pablo.slack.money.slack.request.SlackProperties
 
 @RestController
@@ -21,10 +22,14 @@ class SlackRestController(
     }
 
     @PostMapping("/add/", consumes = ["application/x-www-form-urlencoded;charset=UTF-8"])
-    fun getRequest(@RequestBody param: MultiValueMap<String, String>): String {
+    fun addRequest(@RequestBody param: MultiValueMap<String, String>): String {
         val slackRequest = generateRequest(param)
         return slackService.add(slackRequest)
     }
+
+    @ResponseStatus(value = HttpStatus.OK)
+    @ExceptionHandler(SelfMoneyException::class)
+    fun handleSelfMoneyException() = "You cannot add payment to yourself"
 
     @PostMapping("/balance/", consumes = ["application/x-www-form-urlencoded;charset=UTF-8"])
     fun getBalance(@RequestBody param: MultiValueMap<String, String>): String {
@@ -42,5 +47,9 @@ class SlackRestController(
     @ExceptionHandler(IllegalAccessException::class)
     fun handle() {
     }
+
+    @ResponseStatus(value = HttpStatus.OK)
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgument() = "Invalid command"
 
 }

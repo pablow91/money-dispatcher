@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @NodeEntity
-class UserEntity(
+data class UserEntity(
         var name: String,
 
         @Relationship(type = "PAY", direction = Relationship.OUTGOING) var payed: MutableList<PayRelationship> = arrayListOf(),
@@ -38,7 +38,7 @@ abstract class MoneyRelationship(
 class PayRelationship(payer: UserEntity,
                       receiver: UserEntity,
                       value: Int,
-                      var description: String?,
+                      var description: String? = null,
                       var date: LocalDateTime = LocalDateTime.now(),
                       id: Long? = null
 ) : MoneyRelationship(payer, receiver, value, id) {

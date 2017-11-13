@@ -20,6 +20,9 @@ class MoneyServiceImpl(
 
     @Transactional
     override fun addMoney(addDto: AddDto) {
+        if (addDto.from == addDto.to) {
+            throw SelfMoneyException()
+        }
         val u1 = userService.getOrCreate(addDto.from)
         val u2 = userService.getOrCreate(addDto.to)
         val swap = addDto.value < 0
@@ -28,7 +31,7 @@ class MoneyServiceImpl(
         val to = if (swap) u1 else u2
         val value = if (swap) -addDto.value else addDto.value
         val relation = PayRelationship(from, to, value, addDto.description)
-        moneyRelationshipRepository.save(relation)
+        moneyRelationshipRepository.save(relation, 0)
         updateBalance(from, to, value)
     }
 
@@ -43,7 +46,21 @@ class MoneyServiceImpl(
                     .sorted { x, y -> Integer.compare(x.value, y.value) }
                     .collect(Collectors.groupingBy { to.toPay.any { o -> it.receiver.id == o.receiver.id } })
             res[true]?.forEach {
-                remainingValue = optimizeBetween(to, it.receiver, remainingValue)
+                val opValue: Int
+                val diff: Int
+                if (it.value <= remainingValue) {
+                    from.toPay.remove(it)
+                    to.toReturn.remove(it)
+                    moneyRelationshipRepository.delete(it)
+                    opValue = it.value
+                    diff = remainingValue - it.value
+                } else {
+                    opValue = remainingValue
+                    it.value -= remainingValue
+                    diff = 0
+                    moneyRelationshipRepository.save(it, 0)
+                }
+                remainingValue = optimizeBetween(it.receiver, to, opValue) + diff
                 if (remainingValue == 0) {
                     return
                 }
@@ -54,13 +71,10 @@ class MoneyServiceImpl(
                     return
                 }
             }
-
         }
         // Create dept between me and him
         val newDebt = BalanceRelationship(to, from, remainingValue)
-        from.toReturn.add(newDebt)
-        to.toPay.add(newDebt)
-        moneyRelationshipRepository.save(newDebt)
+        moneyRelationshipRepository.save(newDebt, 0)
     }
 
     private fun optimizeBetween(from: UserEntity, to: UserEntity, remainingValue: Int): Int {
@@ -70,7 +84,7 @@ class MoneyServiceImpl(
             return if (node.value > remainingValue) {
                 //My dept to him is reduced
                 node.value -= remainingValue
-                moneyRelationshipRepository.save(node)
+                moneyRelationshipRepository.save(node,0)
                 0
             } else {
                 //My dept to him is payed
@@ -84,7 +98,7 @@ class MoneyServiceImpl(
             val node2 = from.toReturn.find { it.payer.id == to.id }
             if (node2 != null) {
                 node2.value += remainingValue
-                moneyRelationshipRepository.save(node2)
+                moneyRelationshipRepository.save(node2, 0)
                 return 0
             }
         }
@@ -95,7 +109,7 @@ class MoneyServiceImpl(
     private fun optimizeTransitive(from: UserEntity, old: BalanceRelationship, remainingValue: Int): Int {
         return if (remainingValue >= old.value) {
             val bal = BalanceRelationship(from, old.receiver, old.value)
-            moneyRelationshipRepository.save(bal)
+            moneyRelationshipRepository.save(bal,0)
 
             old.payer.toPay.remove(old)
             old.receiver.toReturn.remove(old)

@@ -1,15 +1,15 @@
 package pl.org.pablo.slack.money.graph
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.neo4j.ogm.session.Session
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@RunWith(SpringRunner::class)
+@ExtendWith(SpringExtension::class)
 @DataNeo4jTest
 class ModelIntegrationTests {
 
@@ -38,6 +38,22 @@ class ModelIntegrationTests {
         assertEquals(u2.name, payRel.receiver.name)
         assertNotNull(payRel.date)
         assertNotNull(payRel.description)
+    }
+
+    @Test
+    fun bla() {
+        val u1 = UserEntity("u1")
+        val u2 = UserEntity("u2")
+        userRepository.save(u1)
+        userRepository.save(u2)
+        session.clear()
+
+        u1.payed.add(PayRelationship(u1, u2, 10, "desc"))
+        userRepository.save(u1)
+
+        session.clear()
+        val result = userRepository.findByName("u1")
+        assertEquals(1, result!!.payed.size)
     }
 
 }
