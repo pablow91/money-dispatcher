@@ -7,11 +7,8 @@ sudo: required
 services:
   - docker
 
-env:
-  - SPRING_PROFILES_ACTIVE=test,travis
-
 before_install:
-  - docker-compose -d up
+  - docker-compose up -d
 
 script:
   - ./gradlew test
