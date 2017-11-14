@@ -1,12 +1,9 @@
-package pl.org.pablo.slack.money
+package pl.org.pablo.slack.money.money
 
 import pl.org.pablo.slack.money.graph.BalanceRelationship
 import pl.org.pablo.slack.money.graph.MoneyRelationshipRepository
 import pl.org.pablo.slack.money.graph.PayRelationship
 import pl.org.pablo.slack.money.graph.UserEntity
-import pl.org.pablo.slack.money.money.AddDto
-import pl.org.pablo.slack.money.money.MoneyServiceImpl
-import pl.org.pablo.slack.money.money.SelfMoneyException
 import pl.org.pablo.slack.money.user.UserService
 import spock.lang.Specification
 
