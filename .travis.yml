@@ -1,0 +1,17 @@
+language: java
+jdk:
+  - oraclejdk9
+
+sudo: required
+
+services:
+  - docker
+
+env:
+  - SPRING_PROFILES_ACTIVE=test,travis
+
+before_install:
+  - docker-compose -d up
+
+script:
+  - ./gradlew test
