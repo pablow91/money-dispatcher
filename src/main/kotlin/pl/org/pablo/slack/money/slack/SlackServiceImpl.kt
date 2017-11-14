@@ -4,9 +4,7 @@ import org.springframework.stereotype.Component
 import pl.org.pablo.slack.money.money.AddDto
 import pl.org.pablo.slack.money.money.MoneyService
 import pl.org.pablo.slack.money.user.UserService
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 @Component
 class SlackServiceImpl(
@@ -42,7 +40,6 @@ class SlackServiceImpl(
     override fun getPaymentHistory(slackRequest: SlackRequest): String {
         val userName = slackRequest.user_id
         val user = userService.getOrCreate(userName)
-        LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG))
         return (user.payed + user.received).asSequence()
                 .sortedBy { it.date }
                 .joinToString(separator = "\n") { "${slackUserService.getUserName(it.payer.name)} -> ${slackUserService.getUserName(it.receiver.name)} - ${it.description} - ${it.value} - ${it.date.format(dateFormat)}" }
