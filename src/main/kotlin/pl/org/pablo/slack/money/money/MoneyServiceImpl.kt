@@ -7,7 +7,6 @@ import pl.org.pablo.slack.money.graph.MoneyRelationshipRepository
 import pl.org.pablo.slack.money.graph.PayRelationship
 import pl.org.pablo.slack.money.graph.UserEntity
 import pl.org.pablo.slack.money.user.UserService
-import java.util.stream.Collectors
 
 @Controller
 class MoneyServiceImpl(
