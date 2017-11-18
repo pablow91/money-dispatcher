@@ -7,6 +7,7 @@ import pl.org.pablo.slack.money.slack.parser.AddArgumentParser
 import pl.org.pablo.slack.money.slack.parser.AddSingleArgument
 import pl.org.pablo.slack.money.slack.parser.ArgumentParserService
 import pl.org.pablo.slack.money.user.UserService
+import pl.org.pablo.slack.money.withMoneyScale
 import java.time.format.DateTimeFormatter
 
 @Component
@@ -32,13 +33,15 @@ class SlackServiceImpl(
         return "Success"
     }
 
-    private fun mergeOneUserAddDto(value: List<AddDto>): AddDto =
-            value.asSequence().reduce { acc, addDto -> acc.copy(value = acc.value + addDto.value) }
+    private fun mergeOneUserAddDto(value: List<AddDto>): AddDto {
+        val dto = value.asSequence().reduce { acc, addDto -> acc.copy(value = acc.value + addDto.value) }
+        return dto.copy(value = dto.value.withMoneyScale())
+    }
 
     private fun toAddDto(from: String, arg: AddSingleArgument, desc: String?): Sequence<AddDto> {
         var perUserValue = arg.value
         if (arg.options.contains("eq")) {
-            perUserValue /= arg.users.size
+            perUserValue /= arg.users.size.toBigDecimal().withMoneyScale()
         }
         return arg.users.asSequence().map { AddDto(from, it, perUserValue, desc) }
     }
