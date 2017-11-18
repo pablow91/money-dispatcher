@@ -5,7 +5,7 @@ import spock.lang.Unroll
 
 class AddParametersParserTests extends Specification {
 
-    def parser = new ArgumentParserImpl()
+    def parser = new ArgumentParserServiceImpl()
     def cut = new AddArgumentParser()
 
     def "One user, no options, with value, no desc"() {

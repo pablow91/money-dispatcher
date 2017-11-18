@@ -7,7 +7,7 @@ import pl.org.pablo.slack.money.money.BalanceDto
 import pl.org.pablo.slack.money.money.MoneyService
 import pl.org.pablo.slack.money.slack.parser.AddArgument
 import pl.org.pablo.slack.money.slack.parser.AddSingleArgument
-import pl.org.pablo.slack.money.slack.parser.ArgumentParser
+import pl.org.pablo.slack.money.slack.parser.ArgumentParserService
 import pl.org.pablo.slack.money.user.UserService
 import spock.lang.Specification
 
@@ -19,7 +19,7 @@ class SlackServiceTests extends Specification {
     def userService = Mock(UserService)
     def chatService = Mock(ChatService)
     def slackUserService = Mock(SlackUserService)
-    def argumentParser = Mock(ArgumentParser)
+    def argumentParser = Mock(ArgumentParserService)
 
     def cut = new SlackServiceImpl(moneyService, userService, chatService, slackUserService, argumentParser)
 

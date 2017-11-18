@@ -7,25 +7,25 @@ class AddArgumentParser : Parser<AddArgument> {
 
     private var users: List<AddSingleArgument>? = null
 
-    override fun canParse(command: String): Boolean {
+    override fun canParse(element: String): Boolean {
         if (users == null) {
-            return userParser.canParse(command) || userParser.canFinalize()
+            return userParser.canParse(element) || userParser.canFinalize()
         }
         return true
     }
 
     override fun canFinalize(): Boolean = users != null || userParser.canFinalize()
 
-    override fun parse(command: String): Boolean {
+    override fun parse(element: String): Boolean {
         if (users == null) {
-            if (userParser.canParse(command)) {
-                userParser.parse(command)
+            if (userParser.canParse(element)) {
+                userParser.parse(element)
                 return false
             } else {
                 users = userParser.finalize()
             }
         }
-        descriptionParser.parse(command)
+        descriptionParser.parse(element)
         return false
     }
 
@@ -70,8 +70,8 @@ class AddUserParser : Parser<List<AddSingleArgument>> {
         USER, VALUE, OPTION, UNKNOWN
     }
 
-    override fun canParse(command: String): Boolean {
-        val type = commandType(command)
+    override fun canParse(element: String): Boolean {
+        val type = elementType(element)
         return when (type) {
             Status.USER -> true
             Status.VALUE -> current.users.isNotEmpty()
@@ -82,47 +82,50 @@ class AddUserParser : Parser<List<AddSingleArgument>> {
 
     override fun canFinalize(): Boolean = result.isNotEmpty() && current.isEmpty()
 
-    private fun commandType(command: String) = when (command) {
-        in Regex("<@([aA-zZ0-9]+)(\\|[aA-zZ0-9]+)?>") -> Status.USER
-        in Regex("\\d+") -> Status.VALUE
-        in Regex("-+[aA-zZ0-9]+") -> Status.OPTION
+    private object Pattern {
+        val user = Regex("<@([aA-zZ0-9]+)(\\|[aA-zZ0-9]+)?>")
+        val value = Regex("\\d+")
+        val option = Regex("-+[aA-zZ0-9]+")
+    }
+
+    private fun elementType(element: String): Status = when (element) {
+        in Pattern.user -> Status.USER
+        in Pattern.value -> Status.VALUE
+        in Pattern.option -> Status.OPTION
         else -> Status.UNKNOWN
     }
 
-    override fun parse(command: String): Boolean {
-        val type = commandType(command)
+    override fun parse(element: String): Boolean {
+        val type = elementType(element)
         when (type) {
-            Status.USER -> parseUser(command)
-            Status.VALUE -> parseValue(command)
-            Status.OPTION -> parseOption(command)
-            Status.UNKNOWN -> throw IllegalArgumentException()
+            Status.USER -> parseUser(element)
+            Status.VALUE -> parseValue(element)
+            Status.OPTION -> parseOption(element)
+            Status.UNKNOWN -> throw IllegalArgumentException("Illegal `parse` invocation. Use `canParse` earlier")
         }
         return false
     }
 
     private fun parseUser(userName: String) {
-        val name = userName.replace(Regex("<@([aA-zZ0-9]+)(\\|[aA-zZ0-9]+)?>"), { it.destructured.component1() })
+        val name = userName.replace(Pattern.user, { it.destructured.component1() })
         current.users.add(name)
     }
 
     private fun parseValue(value: String) {
-        if (current.users.isEmpty()) {
-            throw IllegalStateException("At least one user has to be provided")
-        }
         val lastValue = value.toInt()
         val res = AddSingleArgument(current.users.toList(), lastValue, current.options.toSet())
         result.add(res)
         current = AddPaymentForUsers()
     }
 
-    private fun parseOption(command: String) {
-        val option = command.dropWhile { it == '-' }
+    private fun parseOption(opt: String) {
+        val option = opt.dropWhile { it == '-' }
         current.options.add(option)
     }
 
     override fun finalize(): List<AddSingleArgument> {
         if (!canFinalize()) {
-            throw IllegalStateException("Value was required, but last")
+            throw IllegalStateException("Parser is in inconsistent state")
         }
         return result.toList()
     }
@@ -132,12 +135,12 @@ class AddUserParser : Parser<List<AddSingleArgument>> {
 class AddDescriptionParser : Parser<String?> {
     private val sb = StringBuilder()
 
-    override fun canParse(command: String): Boolean = true
+    override fun canParse(element: String): Boolean = true
 
     override fun canFinalize(): Boolean = true
 
-    override fun parse(command: String): Boolean {
-        sb.append(command).append(" ")
+    override fun parse(element: String): Boolean {
+        sb.append(element).append(" ")
         return false
     }
 

@@ -5,7 +5,7 @@ import pl.org.pablo.slack.money.money.AddDto
 import pl.org.pablo.slack.money.money.MoneyService
 import pl.org.pablo.slack.money.slack.parser.AddArgumentParser
 import pl.org.pablo.slack.money.slack.parser.AddSingleArgument
-import pl.org.pablo.slack.money.slack.parser.ArgumentParser
+import pl.org.pablo.slack.money.slack.parser.ArgumentParserService
 import pl.org.pablo.slack.money.user.UserService
 import java.time.format.DateTimeFormatter
 
@@ -15,14 +15,14 @@ class SlackServiceImpl(
         private val userService: UserService,
         private val chatService: ChatService,
         private val slackUserService: SlackUserService,
-        private val argumentParser: ArgumentParser
+        private val argumentParserService: ArgumentParserService
 ) : SlackService {
 
     private val dateFormat = DateTimeFormatter.ofPattern("dd-MM-yy hh:mm")
     private val addArgumentParser = AddArgumentParser()
 
     override fun add(slackRequest: SlackRequest): String {
-        val arg = argumentParser.parse(addArgumentParser, slackRequest.text)
+        val arg = argumentParserService.parse(addArgumentParser, slackRequest.text)
         arg.payments.asSequence()
                 .flatMap { toAddDto(slackRequest.user_id, it, arg.description) }
                 .groupBy { it.to }
