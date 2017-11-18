@@ -7,6 +7,8 @@ import pl.org.pablo.slack.money.graph.MoneyRelationshipRepository
 import pl.org.pablo.slack.money.graph.PayRelationship
 import pl.org.pablo.slack.money.graph.UserEntity
 import pl.org.pablo.slack.money.user.UserService
+import pl.org.pablo.slack.money.withMoneyScale
+import java.math.BigDecimal
 
 @Controller
 class MoneyServiceImpl(
@@ -25,11 +27,12 @@ class MoneyServiceImpl(
         // Find who owes to whom
         val u1 = userService.getOrCreate(addDto.from)
         val u2 = userService.getOrCreate(addDto.to)
-        val swap = addDto.value < 0
+        val swap = addDto.value < BigDecimal.ZERO
 
         val from = if (swap) u2 else u1
         val to = if (swap) u1 else u2
-        val value = if (swap) -addDto.value else addDto.value
+        val tmpValue = addDto.value.withMoneyScale()
+        val value = if (swap) tmpValue.negate() else tmpValue
         val relation = PayRelationship(from, to, value, addDto.description)
         moneyRelationshipRepository.save(relation, 0)
         updateBalance(from, to, value)
@@ -42,18 +45,18 @@ class MoneyServiceImpl(
      * @param to the user which is owed to
      * @param value the amount of money which is owed
      */
-    private fun updateBalance(from: UserEntity, to: UserEntity, value: Int) {
+    private fun updateBalance(from: UserEntity, to: UserEntity, value: BigDecimal) {
         var remainingValue = reduceDebt(from, to, value)
-        if (remainingValue == 0) {
+        if (remainingValue.compareTo(BigDecimal.ZERO) == 0) {
             return
         }
         // Check if a user owes anyone money and then move this debt
         if (from.toPay.isNotEmpty()) {
             val res = from.toPay.asSequence().sortedBy { it.value }
-                    .groupBy { to.toPay.any {o -> it.receiver.id == o.receiver.id} }
+                    .groupBy { to.toPay.any { o -> it.receiver.id == o.receiver.id } }
             res[true]?.forEach {
-                val opValue: Int
-                val diff: Int
+                val opValue: BigDecimal
+                val diff: BigDecimal
                 if (it.value <= remainingValue) {
                     from.toPay.remove(it)
                     to.toReturn.remove(it)
@@ -63,17 +66,17 @@ class MoneyServiceImpl(
                 } else {
                     opValue = remainingValue
                     it.value -= remainingValue
-                    diff = 0
+                    diff = BigDecimal.ZERO
                     moneyRelationshipRepository.save(it, 0)
                 }
                 remainingValue = reduceDebt(it.receiver, to, opValue) + diff
-                if (remainingValue == 0) {
+                if (remainingValue.compareTo(BigDecimal.ZERO) == 0) {
                     return
                 }
             }
             res[false]?.forEach {
                 remainingValue = transferDebt(to, it, remainingValue)
-                if (remainingValue == 0) {
+                if (remainingValue.compareTo(BigDecimal.ZERO) == 0) {
                     return
                 }
             }
@@ -90,7 +93,7 @@ class MoneyServiceImpl(
      * @param to the user to which the debt goes to
      * @param remainingValue the amount by which the debt has to be changed
      */
-    private fun reduceDebt(from: UserEntity, to: UserEntity, remainingValue: Int): Int {
+    private fun reduceDebt(from: UserEntity, to: UserEntity, remainingValue: BigDecimal): BigDecimal {
         // Check if I owe him money
         val node = from.toPay.find { it.receiver.id == to.id }
         if (node != null) {
@@ -98,7 +101,7 @@ class MoneyServiceImpl(
                 // Reduce the debt
                 node.value -= remainingValue
                 moneyRelationshipRepository.save(node, 0)
-                0
+                BigDecimal.ZERO
             } else {
                 // The debt is paid so remove the connection
                 from.toPay.remove(node)
@@ -112,7 +115,7 @@ class MoneyServiceImpl(
             if (node2 != null) {
                 node2.value += remainingValue
                 moneyRelationshipRepository.save(node2, 0)
-                return 0
+                return BigDecimal.ZERO
             }
         }
 
@@ -127,7 +130,7 @@ class MoneyServiceImpl(
      * @param old the other debtors of this user
      * @param remainingValue the amount of debt to transfer
      */
-    private fun transferDebt(from: UserEntity, old: BalanceRelationship, remainingValue: Int): Int {
+    private fun transferDebt(from: UserEntity, old: BalanceRelationship, remainingValue: BigDecimal): BigDecimal {
         return if (remainingValue >= old.value) {
             val bal = BalanceRelationship(from, old.receiver, old.value)
             moneyRelationshipRepository.save(bal, 0)
@@ -141,7 +144,7 @@ class MoneyServiceImpl(
             old.value -= remainingValue
             val bal = BalanceRelationship(from, old.receiver, remainingValue)
             moneyRelationshipRepository.saveAll(listOf(old, bal))
-            0
+            BigDecimal.ZERO
         }
     }
 
