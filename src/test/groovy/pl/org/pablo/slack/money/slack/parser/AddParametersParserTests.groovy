@@ -76,6 +76,19 @@ class AddParametersParserTests extends Specification {
         res.getDescription() == "desc"
     }
 
+    def "One user, one options, with negative value, with desc"() {
+        given:
+        def command = "<@W1|U1> -a -10 desc"
+        when:
+        def res = parser.parse(cut, command)
+        then:
+        res.getPayments().size() == 1
+        res.getPayments()[0].options == (["a"] as Set)
+        res.getPayments()[0].users == ["W1"]
+        res.getPayments()[0].value == -10
+        res.getDescription() == "desc"
+    }
+
     @Unroll
     def "Invalid command (state) - #command"(String command) {
         when:

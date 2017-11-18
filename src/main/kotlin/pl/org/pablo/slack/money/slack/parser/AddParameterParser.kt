@@ -84,7 +84,7 @@ class AddUserParser : Parser<List<AddSingleArgument>> {
 
     private object Pattern {
         val user = Regex("<@([aA-zZ0-9]+)(\\|[aA-zZ0-9]+)?>")
-        val value = Regex("\\d+")
+        val value = Regex("-?\\d+")
         val option = Regex("-+[aA-zZ0-9]+")
     }
 
