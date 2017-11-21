@@ -36,7 +36,7 @@ class ModelIntegrationTests {
         val payRel = result.payed[0]
         assertEquals(u1.name, payRel.payer.name)
         assertEquals(u2.name, payRel.receiver.name)
-        assertNotNull(payRel.date)
+        assertNotNull(payRel.creationDate)
         assertNotNull(payRel.description)
     }
 

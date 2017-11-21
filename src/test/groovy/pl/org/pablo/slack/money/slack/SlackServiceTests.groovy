@@ -8,8 +8,6 @@ import pl.org.pablo.slack.money.money.MoneyService
 import pl.org.pablo.slack.money.user.UserService
 import spock.lang.Specification
 
-import java.time.LocalDateTime
-
 class SlackServiceTests extends Specification {
 
     def moneyService = Mock(MoneyService)
@@ -69,8 +67,8 @@ class SlackServiceTests extends Specification {
 
     def "When fetching payment history result should have not empty string"() {
         given:
-        def p1 = new PayRelationship(new UserEntity(), new UserEntity(), 10, "desc", LocalDateTime.now(), null)
-        def p2 = new PayRelationship(new UserEntity(), new UserEntity(), 10, "desc", LocalDateTime.now(), null)
+        def p1 = new PayRelationship(new UserEntity(), new UserEntity(), 10, "desc")
+        def p2 = new PayRelationship(new UserEntity(), new UserEntity(), 10, "desc")
         userService.getOrCreate(_) >> new UserEntity("W1", [p1], [p2], [], [], null)
         when:
         def result = cut.getPaymentHistory(new SlackRequest([user_id: "id"]))

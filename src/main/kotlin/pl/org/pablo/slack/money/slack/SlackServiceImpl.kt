@@ -41,8 +41,8 @@ class SlackServiceImpl(
         val userName = slackRequest.user_id
         val user = userService.getOrCreate(userName)
         return (user.payed + user.received).asSequence()
-                .sortedBy { it.date }
-                .joinToString(separator = "\n") { "${slackUserService.getUserName(it.payer.name)} -> ${slackUserService.getUserName(it.receiver.name)} - ${it.description} - ${it.value} - ${it.date.format(dateFormat)}" }
+                .sortedBy { it.creationDate }
+                .joinToString(separator = "\n") { "${slackUserService.getUserName(it.payer.name)} -> ${slackUserService.getUserName(it.receiver.name)} - ${it.description} - ${it.value} - ${it.creationDate.format(dateFormat)}" }
     }
 
 }
