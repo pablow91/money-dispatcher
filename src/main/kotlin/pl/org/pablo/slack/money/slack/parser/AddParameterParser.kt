@@ -1,5 +1,8 @@
 package pl.org.pablo.slack.money.slack.parser
 
+import org.springframework.stereotype.Component
+
+@Component
 class AddArgumentParser : Parser<AddArgument> {
 
     private val userParser = AddUserParser()
