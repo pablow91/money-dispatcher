@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlinVersion = '1.2.0-rc-39'
+        kotlinVersion = '1.2.0'
         springBootVersion = '2.0.0.M6'
         swaggerVersion = '2.7.0'
         spockVersion = '1.1-groovy-2.4'
@@ -10,7 +10,6 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url 'https://repo.spring.io/milestone' }
-        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -46,7 +45,6 @@ junitPlatform {
 repositories {
     mavenCentral()
     maven { url 'https://repo.spring.io/milestone' }
-    maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
 }
 
 noArg {
