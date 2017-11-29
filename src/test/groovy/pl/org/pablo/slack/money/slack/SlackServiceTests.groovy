@@ -29,7 +29,7 @@ class SlackServiceTests extends Specification {
         when:
         cut.add(new SlackRequest([text: "", user_id: "W2", user_name: "name"]))
         then:
-        1 * moneyService.addMoney(new AddDto("W2", "W1", 10, "desc"))
+        1 * moneyService.addMoney(new AddDto("W2", "W1", 10.00, "desc"))
         1 * chatService.sendMessage("W1", _)
     }
 
@@ -39,8 +39,8 @@ class SlackServiceTests extends Specification {
         when:
         cut.add(new SlackRequest([text: "", user_id: "W2", user_name: "name"]))
         then:
-        1 * moneyService.addMoney(new AddDto("W2", "W1", 10, "desc"))
-        1 * moneyService.addMoney(new AddDto("W2", "W3", 10, "desc"))
+        1 * moneyService.addMoney(new AddDto("W2", "W1", 10.00, "desc"))
+        1 * moneyService.addMoney(new AddDto("W2", "W3", 10.00, "desc"))
         1 * chatService.sendMessage("W1", _)
         1 * chatService.sendMessage("W3", _)
     }
@@ -53,7 +53,7 @@ class SlackServiceTests extends Specification {
         when:
         cut.add(new SlackRequest([text: "", user_id: "W2", user_name: "name"]))
         then:
-        1 * moneyService.addMoney(new AddDto("W2", "W1", 30, "desc"))
+        1 * moneyService.addMoney(new AddDto("W2", "W1", 30.00, "desc"))
         1 * chatService.sendMessage("W1", _)
     }
 
@@ -63,8 +63,8 @@ class SlackServiceTests extends Specification {
         when:
         cut.add(new SlackRequest([text: "", user_id: "W2", user_name: "name"]))
         then:
-        1 * moneyService.addMoney(new AddDto("W2", "W1", 5, "desc"))
-        1 * moneyService.addMoney(new AddDto("W2", "W3", 5, "desc"))
+        1 * moneyService.addMoney(new AddDto("W2", "W1", 5.00, "desc"))
+        1 * moneyService.addMoney(new AddDto("W2", "W3", 5.00, "desc"))
         1 * chatService.sendMessage("W1", _)
         1 * chatService.sendMessage("W3", _)
     }
