@@ -9,7 +9,6 @@ import pl.org.pablo.slack.money.money.MoneyService
 import pl.org.pablo.slack.money.slack.SlackMoneyMergerImpl
 import pl.org.pablo.slack.money.slack.SlackUserService
 import pl.org.pablo.slack.money.slack.parser.AddArgument
-import pl.org.pablo.slack.money.slack.parser.AddArgumentParser
 import pl.org.pablo.slack.money.slack.parser.AddSingleArgument
 import pl.org.pablo.slack.money.slack.parser.ArgumentParserService
 import pl.org.pablo.slack.money.user.UserService
@@ -22,18 +21,17 @@ class SlackCommandServiceTests extends Specification {
     def moneyService = Mock(MoneyService)
     def userService = Mock(UserService)
     def slackUserService = Mock(SlackUserService)
-    def addArgumentParser = new AddArgumentParser()
     def argumentParser = Mock(ArgumentParserService)
     def slackMoneyMerger = new SlackMoneyMergerImpl()
 
-    def cut = new SlackCommandServiceImpl(moneyService, userService, addArgumentParser, slackUserService, argumentParser, slackMoneyMerger)
+    def cut = new SlackCommandServiceImpl(moneyService, userService, slackUserService, argumentParser, slackMoneyMerger)
 
     def "When command is valid and there is a field return proper Slack interactive message"() {
         given:
         def desc = "desc"
         def from = "from"
         def to = "to"
-        def value = 10
+        def value = 10.00
         def payment = new AddSingleArgument([to], value, [] as Set)
         def addArg = new AddArgument([payment], desc)
         argumentParser.parse(_, _) >> addArg
@@ -46,7 +44,6 @@ class SlackCommandServiceTests extends Specification {
         result.attachments[0].fields[0].value == value.toString()
         result.attachments[0].fields[0].title == to
         result.attachments[0].actions[0].value == "_"
-
     }
 
     def "When sending wrong command when adding new payment IllegalArgumentException should be thrown"() {

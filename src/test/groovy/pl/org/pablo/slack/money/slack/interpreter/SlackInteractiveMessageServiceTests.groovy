@@ -7,7 +7,6 @@ import pl.org.pablo.slack.money.slack.ChatService
 import pl.org.pablo.slack.money.slack.SlackMoneyMerger
 import pl.org.pablo.slack.money.slack.interactive.*
 import pl.org.pablo.slack.money.slack.parser.AddArgument
-import pl.org.pablo.slack.money.slack.parser.AddArgumentParser
 import pl.org.pablo.slack.money.slack.parser.AddSingleArgument
 import pl.org.pablo.slack.money.slack.parser.ArgumentParserService
 import spock.lang.Specification
@@ -15,12 +14,11 @@ import spock.lang.Specification
 class SlackInteractiveMessageServiceTests extends Specification {
 
     def argumentParserService = Mock(ArgumentParserService)
-    def addArgumentParser = Mock(AddArgumentParser)
     def chatService = Mock(ChatService)
     def moneyService = Mock(MoneyService)
     def slackMoneyMerger = Mock(SlackMoneyMerger)
 
-    def cut = new SlackInteractiveMessageServiceImpl(argumentParserService, addArgumentParser, chatService, moneyService, slackMoneyMerger)
+    def cut = new SlackInteractiveMessageServiceImpl(argumentParserService, chatService, moneyService, slackMoneyMerger)
 
     def team = new Team("", "")
     def channel = new Channel("", "")

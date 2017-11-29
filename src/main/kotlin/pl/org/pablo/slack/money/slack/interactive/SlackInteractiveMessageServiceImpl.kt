@@ -13,7 +13,6 @@ import pl.org.pablo.slack.money.slack.parser.ArgumentParserService
 @Service
 class SlackInteractiveMessageServiceImpl(
         private val argumentParserService: ArgumentParserService,
-        private val addArgumentParser: AddArgumentParser,
         private val chatService: ChatService,
         private val moneyService: MoneyService,
         private val slackMoneyMerger: SlackMoneyMerger
@@ -32,7 +31,7 @@ class SlackInteractiveMessageServiceImpl(
             return "Cancelled"
         }
         val command = HtmlUtils.htmlUnescape(action.value)
-        val arg = argumentParserService.parse(addArgumentParser, command)
+        val arg = argumentParserService.parse(AddArgumentParser(), command)
         slackMoneyMerger.mergeUserIntoSequence(arg.payments, slackInteractiveDto.user.id, arg.description)
                 .onEach { moneyService.addMoney(it) }
                 .forEach { chatService.sendMessage(it.to, getAddNotificationMessage(it)) }

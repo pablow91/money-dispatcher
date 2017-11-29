@@ -16,7 +16,6 @@ import java.time.format.DateTimeFormatter
 class SlackCommandServiceImpl(
         private val moneyService: MoneyService,
         private val userService: UserService,
-        private val addArgumentParser: AddArgumentParser,
         private val slackUserService: SlackUserService,
         private val argumentParserService: ArgumentParserService,
         private val slackMoneyMerger: SlackMoneyMerger
@@ -25,7 +24,7 @@ class SlackCommandServiceImpl(
     private val dateFormat = DateTimeFormatter.ofPattern("dd-MM-yy hh:mm")
 
     override fun add(slackRequest: SlackRequest): InteractiveMessage {
-        val arg = argumentParserService.parse(addArgumentParser, slackRequest.text)
+        val arg = argumentParserService.parse(AddArgumentParser(), slackRequest.text)
         val fields = slackMoneyMerger.mergeUserIntoSequence(arg.payments, slackRequest.user_id, arg.description)
                 .sortedBy { it.to }
                 .map { it.toField() }
