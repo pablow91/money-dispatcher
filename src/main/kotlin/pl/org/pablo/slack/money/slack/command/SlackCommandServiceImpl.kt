@@ -30,7 +30,7 @@ class SlackCommandServiceImpl(
                 .map { it.toField() }
                 .toList()
         return InteractiveMessage(
-                text = "Would you like to config the payment?",
+                text = "Would you like to confirm the payment?",
                 attachments = listOf(
                         Attachment(
                                 fallback = "You are unable to confirm the payment",

@@ -6,6 +6,7 @@ import pl.org.pablo.slack.money.money.AddDto
 import pl.org.pablo.slack.money.money.MoneyService
 import pl.org.pablo.slack.money.slack.ChatService
 import pl.org.pablo.slack.money.slack.SlackMoneyMerger
+import pl.org.pablo.slack.money.slack.SlackUserService
 import pl.org.pablo.slack.money.slack.interactive.CallbacksId.ConfirmAdd
 import pl.org.pablo.slack.money.slack.parser.AddArgumentParser
 import pl.org.pablo.slack.money.slack.parser.ArgumentParserService
@@ -15,7 +16,8 @@ class SlackInteractiveMessageServiceImpl(
         private val argumentParserService: ArgumentParserService,
         private val chatService: ChatService,
         private val moneyService: MoneyService,
-        private val slackMoneyMerger: SlackMoneyMerger
+        private val slackMoneyMerger: SlackMoneyMerger,
+        private val slackUserService: SlackUserService
 ) : SlackInteractiveMessageService {
 
     override fun parse(slackInteractiveDto: SlackInteractiveDto): String {
@@ -39,6 +41,6 @@ class SlackInteractiveMessageServiceImpl(
     }
 
     private fun getAddNotificationMessage(addDto: AddDto): String =
-            "Added new payment from: ${addDto.from} with value: ${addDto.value}"
+            "Added new payment from: ${slackUserService.getUserName(addDto.from)} with value: ${addDto.value}"
 
 }
