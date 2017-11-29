@@ -1,11 +1,14 @@
-package pl.org.pablo.slack.money.slack
+package pl.org.pablo.slack.money.slack.command
 
-interface SlackService {
-    fun add(slackRequest: SlackRequest): String
+import pl.org.pablo.slack.money.slack.InteractiveMessage
 
-    fun getBalance(slackRequest: SlackRequest): String
+interface SlackCommandService {
 
-    fun getPaymentHistory(slackRequest: SlackRequest): String
+    fun add(slackRequest: SlackRequest): InteractiveMessage
+
+    fun getBalance(slackRequest: SlackRequest): InteractiveMessage
+
+    fun getPaymentHistory(slackRequest: SlackRequest): InteractiveMessage
 }
 
 class SlackRequest(map: Map<String, String>) {

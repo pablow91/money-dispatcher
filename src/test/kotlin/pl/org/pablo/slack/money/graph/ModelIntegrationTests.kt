@@ -8,6 +8,7 @@ import org.neo4j.ogm.session.Session
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.math.BigDecimal
 
 @ExtendWith(SpringExtension::class)
 @DataNeo4jTest
@@ -27,7 +28,7 @@ class ModelIntegrationTests {
         val u1 = UserEntity("u1")
         val u2 = UserEntity("u2")
 
-        val rel = PayRelationship(u1, u2, 10, "desc")
+        val rel = PayRelationship(u1, u2, BigDecimal.TEN, "desc")
         moneyRelRepository.save(rel)
 
         session.clear()
@@ -36,6 +37,7 @@ class ModelIntegrationTests {
         val payRel = result.payed[0]
         assertEquals(u1.name, payRel.payer.name)
         assertEquals(u2.name, payRel.receiver.name)
+        assertEquals(BigDecimal.TEN, payRel.value)
         assertNotNull(payRel.creationDate)
         assertNotNull(payRel.description)
     }
@@ -48,7 +50,7 @@ class ModelIntegrationTests {
         userRepository.save(u2)
         session.clear()
 
-        u1.payed.add(PayRelationship(u1, u2, 10, "desc"))
+        u1.payed.add(PayRelationship(u1, u2, BigDecimal.TEN, "desc"))
         userRepository.save(u1)
 
         session.clear()

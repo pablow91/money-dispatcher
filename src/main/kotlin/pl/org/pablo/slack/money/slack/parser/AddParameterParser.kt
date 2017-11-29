@@ -1,5 +1,8 @@
 package pl.org.pablo.slack.money.slack.parser
 
+import pl.org.pablo.slack.money.toMoneyDecimal
+import java.math.BigDecimal
+
 class AddArgumentParser : Parser<AddArgument> {
 
     private val userParser = AddUserParser()
@@ -43,7 +46,7 @@ class AddArgumentParser : Parser<AddArgument> {
 
 data class AddSingleArgument(
         val users: List<String>,
-        val value: Int,
+        val value: BigDecimal,
         val options: Set<String> = emptySet()
 )
 
@@ -84,7 +87,7 @@ class AddUserParser : Parser<List<AddSingleArgument>> {
 
     private object Pattern {
         val user = Regex("<@([aA-zZ0-9]+)(\\|.+)?>")
-        val value = Regex("-?\\d+")
+        val value = Regex("-?[0-9]+(\\.[0-9]+)?")
         val option = Regex("-+[aA-zZ0-9]+")
     }
 
@@ -112,7 +115,7 @@ class AddUserParser : Parser<List<AddSingleArgument>> {
     }
 
     private fun parseValue(value: String) {
-        val lastValue = value.toInt()
+        val lastValue = value.toMoneyDecimal()
         val res = AddSingleArgument(current.users.toList(), lastValue, current.options.toSet())
         result.add(res)
         current = AddPaymentForUsers()

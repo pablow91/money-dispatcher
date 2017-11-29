@@ -1,5 +1,7 @@
 package pl.org.pablo.slack.money.money
 
+import java.math.BigDecimal
+
 /**
  * Deals with managing the state of debt between users.
  */
@@ -22,13 +24,13 @@ interface MoneyService {
 
 data class BalanceDto(
         val name: String,
-        val value: Int
+        val value: BigDecimal
 )
 
 data class AddDto(
         val from: String,
         val to: String,
-        val value: Int,
+        val value: BigDecimal,
         val description: String? = null
 )
 
