@@ -38,7 +38,7 @@ class ModelIntegrationTests {
         assertEquals(u1.name, payRel.payer.name)
         assertEquals(u2.name, payRel.receiver.name)
         assertEquals(BigDecimal.TEN, payRel.value)
-        assertNotNull(payRel.date)
+        assertNotNull(payRel.creationDate)
         assertNotNull(payRel.description)
     }
 

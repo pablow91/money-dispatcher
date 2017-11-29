@@ -26,8 +26,8 @@ class TestController(
     fun getPaymentHistory(@PathVariable("user") userName: String): String {
         val user = userService.getOrCreate(userName)
         return (user.payed + user.received).asSequence()
-                .sortedBy { it.date }
-                .joinToString { "${it.payer.name} -> ${it.receiver.name} - ${it.description} - ${it.value} - ${it.date}" }
+                .sortedBy { it.creationDate }
+                .joinToString { "${it.payer.name} -> ${it.receiver.name} - ${it.description} - ${it.value} - ${it.creationDate}" }
     }
 
 

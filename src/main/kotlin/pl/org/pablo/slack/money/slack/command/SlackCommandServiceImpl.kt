@@ -95,10 +95,10 @@ class SlackCommandServiceImpl(
     override fun getPaymentHistory(slackRequest: SlackRequest): InteractiveMessage {
         val userName = slackRequest.user_id
         val user = userService.getOrCreate(userName)
-        val history = (user.payed + user.received).sortedBy { it.date }
+        val history = (user.payed + user.received).sortedBy { it.creationDate }
 
         val fields = history.map { it.toField() }
-        val fallbackString = history.joinToString(separator = "\n") { "${slackUserService.getUserName(it.payer.name)} -> ${slackUserService.getUserName(it.receiver.name)} - ${it.description} - ${it.value} - ${it.date.format(dateFormat)}" }
+        val fallbackString = history.joinToString(separator = "\n") { "${slackUserService.getUserName(it.payer.name)} -> ${slackUserService.getUserName(it.receiver.name)} - ${it.description} - ${it.value} - ${it.creationDate.format(dateFormat)}" }
 
         return InteractiveMessage(
                 text = "Your payment history",
@@ -116,7 +116,7 @@ class SlackCommandServiceImpl(
 
     fun PayRelationship.toField(): Field = Field(
             title = "${slackUserService.getUserName(payer.name)} -> ${slackUserService.getUserName(receiver.name)}",
-            value = "$value - ${date.format(dateFormat)} ${description ?: ""}",
+            value = "$value - ${creationDate.format(dateFormat)} ${description ?: ""}",
             short = false
     )
 

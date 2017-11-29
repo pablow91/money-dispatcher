@@ -1,6 +1,8 @@
 package pl.org.pablo.slack.money.graph
 
 import org.neo4j.ogm.annotation.*
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -28,10 +30,16 @@ data class UserEntity(
 abstract class MoneyRelationship(
         @StartNode var payer: UserEntity,
         @EndNode var receiver: UserEntity,
-        @Property var value: BigDecimal,
-        var id: Long? = null,
-        @Property var uuid: String = UUID.randomUUID().toString()
+        @Property var value: BigDecimal
 ) {
+    var id: Long? = null
+    @CreatedDate
+    var creationDate: LocalDateTime = LocalDateTime.now()
+    @LastModifiedDate
+    var modificationDate: LocalDateTime = LocalDateTime.now()
+    @Property
+    var uuid: String = UUID.randomUUID().toString()
+
     protected constructor() : this(UserEntity.STUB, UserEntity.STUB, BigDecimal.ZERO)
 }
 
@@ -39,10 +47,8 @@ abstract class MoneyRelationship(
 class PayRelationship(payer: UserEntity,
                       receiver: UserEntity,
                       value: BigDecimal,
-                      var description: String? = null,
-                      var date: LocalDateTime = LocalDateTime.now(),
-                      id: Long? = null
-) : MoneyRelationship(payer, receiver, value, id) {
+                      var description: String? = null
+) : MoneyRelationship(payer, receiver, value) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -58,19 +64,15 @@ class PayRelationship(payer: UserEntity,
         return true
     }
 
-    override fun hashCode(): Int {
-        var result = description?.hashCode() ?: 0
-        result = 31 * result + date.hashCode()
-        return result
-    }
+    override fun hashCode(): Int = description?.hashCode() ?: 0
+
 }
 
 @RelationshipEntity(type = "BALANCE")
 class BalanceRelationship(payer: UserEntity,
                           receiver: UserEntity,
-                          value: BigDecimal,
-                          id: Long? = null
-) : MoneyRelationship(payer, receiver, value, id) {
+                          value: BigDecimal
+) : MoneyRelationship(payer, receiver, value) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

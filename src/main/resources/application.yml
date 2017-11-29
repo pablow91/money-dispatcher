@@ -1,3 +1,6 @@
 slack:
   bot:
     base: https://slack.com/api/
+  notification:
+    cron: 0 0 12 * * ?
+    remissionDays: 7
