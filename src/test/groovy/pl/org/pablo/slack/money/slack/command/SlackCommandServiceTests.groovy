@@ -1,10 +1,13 @@
-package pl.org.pablo.slack.money.slack
+package pl.org.pablo.slack.money.slack.command
 
+import kotlin.collections.CollectionsKt
 import pl.org.pablo.slack.money.graph.PayRelationship
 import pl.org.pablo.slack.money.graph.UserEntity
 import pl.org.pablo.slack.money.money.AddDto
 import pl.org.pablo.slack.money.money.BalanceDto
 import pl.org.pablo.slack.money.money.MoneyService
+import pl.org.pablo.slack.money.slack.SlackMoneyMergerImpl
+import pl.org.pablo.slack.money.slack.SlackUserService
 import pl.org.pablo.slack.money.slack.parser.AddArgument
 import pl.org.pablo.slack.money.slack.parser.AddSingleArgument
 import pl.org.pablo.slack.money.slack.parser.ArgumentParserService
@@ -13,60 +16,34 @@ import spock.lang.Specification
 
 import java.time.LocalDateTime
 
-class SlackServiceTests extends Specification {
+class SlackCommandServiceTests extends Specification {
 
     def moneyService = Mock(MoneyService)
     def userService = Mock(UserService)
-    def chatService = Mock(ChatService)
     def slackUserService = Mock(SlackUserService)
     def argumentParser = Mock(ArgumentParserService)
+    def slackMoneyMerger = new SlackMoneyMergerImpl()
 
-    def cut = new SlackServiceImpl(moneyService, userService, chatService, slackUserService, argumentParser)
+    def cut = new SlackCommandServiceImpl(moneyService, userService, slackUserService, argumentParser, slackMoneyMerger)
 
-    def "When adding new valid payment both MoneyService and ChatService should be notified about it"() {
+    def "When command is valid and there is a field return proper Slack interactive message"() {
         given:
-        argumentParser.parse(_, _) >> new AddArgument([new AddSingleArgument(["W1"], 10, [] as Set)], "desc")
+        def desc = "desc"
+        def from = "from"
+        def to = "to"
+        def value = 10.00
+        def payment = new AddSingleArgument([to], value, [] as Set)
+        def addArg = new AddArgument([payment], desc)
+        argumentParser.parse(_, _) >> addArg
+        slackMoneyMerger.mergeUserIntoSequence([payment], from, desc) >> CollectionsKt.asSequence([new AddDto(from, to, value, desc)])
+        slackUserService.getUserName(_) >> { args -> args[0] }
         when:
-        cut.add(new SlackRequest([text: "", user_id: "W2", user_name: "name"]))
+        def result = cut.add(new SlackRequest([text: "_", user_id: from]))
         then:
-        1 * moneyService.addMoney(new AddDto("W2", "W1", 10.00, "desc"))
-        1 * chatService.sendMessage("W1", _)
-    }
-
-    def "When two users are part of the payment both should have got new payment and receive message"() {
-        given:
-        argumentParser.parse(_, _) >> new AddArgument([new AddSingleArgument(["W1", "W3"], 10, [] as Set)], "desc")
-        when:
-        cut.add(new SlackRequest([text: "", user_id: "W2", user_name: "name"]))
-        then:
-        1 * moneyService.addMoney(new AddDto("W2", "W1", 10.00, "desc"))
-        1 * moneyService.addMoney(new AddDto("W2", "W3", 10.00, "desc"))
-        1 * chatService.sendMessage("W1", _)
-        1 * chatService.sendMessage("W3", _)
-    }
-
-    def "When adding user twice in one payment merge his money"() {
-        given:
-        argumentParser.parse(_, _) >> new AddArgument(
-                [new AddSingleArgument(["W1"], 10, [] as Set), new AddSingleArgument(["W1"], 20, [] as Set)],
-                "desc")
-        when:
-        cut.add(new SlackRequest([text: "", user_id: "W2", user_name: "name"]))
-        then:
-        1 * moneyService.addMoney(new AddDto("W2", "W1", 30.00, "desc"))
-        1 * chatService.sendMessage("W1", _)
-    }
-
-    def "When splitting in payment is enabled for 2 people value in their new payments should be split in two"() {
-        given:
-        argumentParser.parse(_, _) >> new AddArgument([new AddSingleArgument(["W1", "W3"], 10, ["eq"] as Set)], "desc")
-        when:
-        cut.add(new SlackRequest([text: "", user_id: "W2", user_name: "name"]))
-        then:
-        1 * moneyService.addMoney(new AddDto("W2", "W1", 5.00, "desc"))
-        1 * moneyService.addMoney(new AddDto("W2", "W3", 5.00, "desc"))
-        1 * chatService.sendMessage("W1", _)
-        1 * chatService.sendMessage("W3", _)
+        !result.attachments.isEmpty()
+        result.attachments[0].fields[0].value == value.toString()
+        result.attachments[0].fields[0].title == to
+        result.attachments[0].actions[0].value == "_"
     }
 
     def "When sending wrong command when adding new payment IllegalArgumentException should be thrown"() {
@@ -84,7 +61,7 @@ class SlackServiceTests extends Specification {
         when:
         def result = cut.getBalance(new SlackRequest([user_id: "id"]))
         then:
-        result == "All good my dear friend!"
+        result.text == "All good my dear friend!"
     }
 
     def "When user don't have empty balance send proper information about balance"() {
@@ -94,7 +71,7 @@ class SlackServiceTests extends Specification {
         when:
         def result = cut.getBalance(new SlackRequest([user_id: "id"]))
         then:
-        result == "W1 10\nW2 -10"
+        result.attachments[0].fields.size() == 2
     }
 
     def "When fetching empty payment history result should be empty"() {
@@ -103,7 +80,7 @@ class SlackServiceTests extends Specification {
         when:
         def result = cut.getPaymentHistory(new SlackRequest([user_id: "id"]))
         then:
-        result.empty
+        result.attachments[0].fields.empty
     }
 
     def "When fetching payment history result should have not empty string"() {
@@ -114,7 +91,7 @@ class SlackServiceTests extends Specification {
         when:
         def result = cut.getPaymentHistory(new SlackRequest([user_id: "id"]))
         then:
-        !result.empty
+        !result.attachments[0].fields.empty
     }
 
 }
