@@ -12,3 +12,10 @@ before_install:
 
 script:
   - ./gradlew test
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "docker" ]; then
+    docker build -t pablow91/money-dispatcher:latest .
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+    docker push pablow91/money-dispatcher:latest;
+    fi
