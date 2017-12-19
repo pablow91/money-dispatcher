@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,13 +18,10 @@ import java.math.BigDecimal
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(classes = [MoneyApplication::class])
-class MoneyServiceIntegrationTests {
-
-    @Autowired
-    lateinit var cut: MoneyService
-
-    @Autowired
-    lateinit var userService: UserService
+class MoneyServiceIntegrationTests(
+        @Autowired val cut: MoneyService,
+        @Autowired val userService: UserService
+) {
 
     @BeforeEach
     @AfterEach
@@ -44,9 +40,8 @@ class MoneyServiceIntegrationTests {
     val twenty = BigDecimal(20)
 
     //Tests
-    @DisplayName("U1 pays to U2 and U2 pays to U3 same amounts -> U3 has to give all to U1")
     @Test
-    fun test1() {
+    fun `U1 pays to U2 and U2 pays to U3 same amounts - U3 has to give all to U1`() {
         val p1 = pay(u1, u2, ten)
         val p2 = pay(u2, u3, ten)
 
@@ -68,9 +63,8 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
-    @DisplayName("U1 pays to U2 and U2 pays half to U3 -> U3 give 5 to U1 and 5 to U2")
     @Test
-    fun test2() {
+    fun `U1 pays to U2 and U2 pays half to U3 - U3 give 5 to U1 and 5 to U2`() {
         val p1 = pay(u1, u2, ten)
         val p2 = pay(u2, u3, five)
 
@@ -94,9 +88,8 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
-    @DisplayName("U1 pays U2 twice -> U2 has to pay all to U1")
     @Test
-    fun test3() {
+    fun `U1 pays U2 twice - U2 has to pay all to U1`() {
         val p1 = pay(u1, u2, ten)
         val p2 = pay(u1, u2, ten)
 
@@ -113,9 +106,8 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
-    @DisplayName("U1 pays U2 same amount as U2 pays to U1 -> nobody pays anything")
     @Test
-    fun test4() {
+    fun `U1 pays U2 same amount as U2 pays to U1 - nobody pays anything`() {
         val p1 = pay(u1, u2, ten)
         val p2 = pay(u2, u1, ten)
 
@@ -130,9 +122,8 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
-    @DisplayName("U1 pays U2 and U2 pays half to U1 -> U2 has to pay U1 other half")
     @Test
-    fun test5() {
+    fun `U1 pays U2 and U2 pays half to U1 - U2 has to pay U1 other half`() {
         val p1 = pay(u1, u2, ten)
         val p2 = pay(u2, u1, five)
 
@@ -151,9 +142,8 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
-    @DisplayName("U1 pays U2 and U3 same amount and U2 pays U3 -> U3 has to pay all to U1")
     @Test
-    fun test6() {
+    fun `U1 pays U2 and U3 same amount and U2 pays U3 - U3 has to pay all to U1`() {
         val p1 = pay(u1, u2, ten)
         val p3 = pay(u2, u3, ten)
         val p2 = pay(u1, u3, ten)
@@ -176,9 +166,8 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
-    @DisplayName("U1 pays U2 and U3 same amount and U2 pays U3 twice as much -> U3 pays to U1 and U2")
     @Test
-    fun test7() {
+    fun `U1 pays U2 and U3 same amount and U2 pays U3 twice as much - U3 pays to U1 and U2`() {
         val p1 = pay(u1, u2, ten)
         val p2 = pay(u1, u3, ten)
         val p3 = pay(u2, u3, twenty)
@@ -203,9 +192,8 @@ class MoneyServiceIntegrationTests {
         ))
     }
 
-    @DisplayName("U1 pays U2 and U3 same amount and U2 pays U3 half -> U3 pays to U1 and U2 pays to U1")
     @Test
-    fun test8() {
+    fun `U1 pays U2 and U3 same amount and U2 pays U3 half - U3 pays to U1 and U2 pays to U1`() {
         val p1 = pay(u1, u2, ten)
         val p2 = pay(u1, u3, ten)
         val p3 = pay(u2, u3, five)

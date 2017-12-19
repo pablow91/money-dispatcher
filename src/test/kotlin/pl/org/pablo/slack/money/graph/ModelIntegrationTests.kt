@@ -12,16 +12,11 @@ import java.math.BigDecimal
 
 @ExtendWith(SpringExtension::class)
 @DataNeo4jTest
-class ModelIntegrationTests {
-
-    @Autowired
-    lateinit var userRepository: UserRepository
-
-    @Autowired
-    lateinit var moneyRelRepository: MoneyRelationshipRepository
-
-    @Autowired
-    lateinit var session: Session
+class ModelIntegrationTests(
+        @Autowired val userRepository: UserRepository,
+        @Autowired val moneyRelRepository: MoneyRelationshipRepository,
+        @Autowired val session: Session
+) {
 
     @Test
     fun basicPaymentTestUsingMoneyRepository() {
