@@ -1,5 +1,7 @@
 package pl.org.pablo.slack.money.money
 
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
 import pl.org.pablo.slack.money.graph.BalanceRelationship
@@ -19,6 +21,7 @@ class MoneyServiceImpl(
     override fun getBalance(userName: String): List<BalanceDto> =
             userService.getOrCreate(userName).getBalance()
 
+    @Retryable(backoff = Backoff(delay = 100, maxDelay = 500))
     @Transactional
     override fun addMoney(addDto: AddDto) {
         if (addDto.from == addDto.to) {

@@ -69,6 +69,7 @@ dependencies {
 
     //Tools
     compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.retry:spring-retry')
     runtime('org.springframework.boot:spring-boot-devtools')
 
     //Swagger
